@@ -21,5 +21,12 @@
   "bugs": {
     "url": "https://github.com/bryauk123/chloe/issues"
   },
-  "homepage": "https://github.com/bryauk123/chloe#readme"
+  "homepage": "https://github.com/bryauk123/chloe#readme",
+  "devDependencies": {
+    "c8": "^7.12.0",
+    "mocha": "^10.2.0"
+  },
+  "dependencies": {
+    "ohm-js": "^16.6.0"
+  }
 }
