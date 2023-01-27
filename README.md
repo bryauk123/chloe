@@ -7,6 +7,13 @@ it's purpose will be to be a fun and silly language.
 # Example functions
 |Chloe|Javascript|
 |-----|----------|
-|toy x = 4|let x = 4|
+|toy x is 4|let x = 4|
 |show ["Hello World"]|console.log("Hello World")|
 
+# Features
+* Mutable Lists
+* Classes
+* Set Operators
+* For Loops/While Loops
+* If/else statements
+* Strong typing

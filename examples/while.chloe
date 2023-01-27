@@ -1,0 +1,4 @@
+
+toy x is 0
+washingHands x == 0|
+    show["hi"]

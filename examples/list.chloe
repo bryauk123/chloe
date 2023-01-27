@@ -1,0 +1,8 @@
+train list is [1,2,3,4]
+
+toy size = howLong?(list)
+
+washingHands is not 0|
+    show[list[size]]
+    size is minus 1
+
