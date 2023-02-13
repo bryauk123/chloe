@@ -21,3 +21,5 @@ it's purpose will be to be a fun and silly language. A lot of the features refer
 * For Loops/While Loops
 * If/else statements
 * Strong typing
+
+Written by: Bryan Apodaca
