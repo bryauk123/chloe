@@ -1,37 +1,35 @@
-Pigeon {
-  Program   = Statement+
-  Statement = PrintStmt
-            | VarDec
-            | AssignStmt
-			| IfStmt
+Chloe{
+	Program = Statement+
+    Statement = PrintStmt
+              | VarDec    
+              | IfStmt
+              | AssignStmt
             
-  PrintStmt = sqwak "(" Exp ")" "🐦"
-  VarDec    = coo Var "=" Exp "🐦"
-  AssignStmt = id "=" Exp "🐦"
-  IfStmt = maybe Exp yep Statement+ nope Statement+ fine
-  
-  id        = ~keyword idchar+
-  idchar    = letter | "🌽" | "🪶"
-  
-  keyword   = coo | sqwak | maybe | yep | nope | fine
-  
-  Var       = id
- 
-  Exp       = Exp "+" Term   --add
-            | Exp "-" Term   --sub
-            | Term
-  
-  Term      = numeral 
+    PrintStmt = show "(" Exp ")" pls
+    VarDec = toy Var is Exp pls
+    IfStmt = dress Exp+ Statement+ nodress Statement+
+    AssignStmt = id is Exp pls
+    
+    id = ~keyword idchar+
+    idchar = letter+
+    
+    keyword = show | pls | toy | is | dress | nodress
+    
+    Var = id
+    
+    Exp = Exp "+" Term pls --add
+    
+    Term      = numeral 
             | strlit
             | Var
-
-  coo       = "coo" ~idchar
-  sqwak     = "sqwak" ~idchar
-  maybe		= "maybe" ~idchar
-  yep 		= "yep" ~idchar
-  nope 		= "nope" ~idchar
-  fine		= "fine" ~idchar
-
-  numeral   = digit+ ("." digit+)?
-  strlit    = "\"" (~"\""  any)* "\""
+            
+    show = "show" ~idchar
+    pls = "pls"   ~idchar
+    toy = "toy"   ~idchar
+    is = "is"     ~idchar
+    dress = "dress" ~idchar
+    nodress = "nodress" ~idchar
+    
+    numeral = digit+ ("."digit+)?
+    strlit = "\"" (~"\""  any)* "\""
 }
