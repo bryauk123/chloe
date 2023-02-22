@@ -6,43 +6,25 @@ export class Program {
   }
 }
 
+export class PrintStatement {
+  constructor(argument) {
+    this.argument = argument
+  }
+}
+
 export class VariableDeclaration {
   constructor(variable, initializer) {
     Object.assign(this, { variable, initializer })
   }
 }
 
-export class FunctionDeclaration {
-  constructor(fun, params, body) {
-    Object.assign(this, { fun, params, body })
-  }
-}
-
-export class Assignment {
+export class AssignmentStatement {
   constructor(target, source) {
     Object.assign(this, { target, source })
   }
 }
 
-export class WhileStatement {
-  constructor(test, body) {
-    Object.assign(this, { test, body })
-  }
-}
-
-export class PrintStatement {
-  constructor(argument) {
-    Object.assign(this, { argument })
-  }
-}
-
-export class Call {
-  constructor(callee, args) {
-    Object.assign(this, { callee, args })
-  }
-}
-
-export class Conditional {
+export class IfStatement {
   constructor(test, consequent, alternate) {
     Object.assign(this, { test, consequent, alternate })
   }
@@ -54,33 +36,11 @@ export class BinaryExpression {
   }
 }
 
-export class UnaryExpression {
-  constructor(op, operand) {
-    Object.assign(this, { op, operand })
+export class StringLiteral {
+  constructor(contents) {
+    this.contents = contents
   }
 }
-
-export class Variable {
-  constructor(name, readOnly) {
-    Object.assign(this, { name, readOnly })
-  }
-}
-
-export class Function {
-  constructor(name, paramCount, readOnly) {
-    Object.assign(this, { name, paramCount, readOnly })
-  }
-}
-
-export const standardLibrary = Object.freeze({
-  π: new Variable("π", true),
-  sqrt: new Function("sqrt", 1, true),
-  sin: new Function("sin", 1, true),
-  cos: new Function("cos", 1, true),
-  exp: new Function("exp", 1, true),
-  ln: new Function("ln", 1, true),
-  hypot: new Function("hypot", 2, true),
-})
 
 // Return a compact and pretty string representation of the node graph,
 // taking care of cycles. Written here from scratch because the built-in

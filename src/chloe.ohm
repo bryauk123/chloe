@@ -17,11 +17,14 @@ Chloe{
     
     Var = id
     
-    Exp = Exp "+" Term pls --add
+    Exp = Exp "+" Term  --add
+        | Exp "-" Term  --sub
+        | Term
     
-    Term      = numeral 
+    Term    = numeral 
             | strlit
             | Var
+            | "(" Exp ")"    --parens
             
     show = "show" ~idchar
     pls = "pls"   ~idchar

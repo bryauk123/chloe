@@ -1,14 +1,14 @@
-import analyze from "./analyzer.js"
-//import optimize from "./optimizer.js"
-//import generate from "./generator.js"
+import analyze from "./analyzer.js";
+import optimize from "./optimizer.js";
+import generate from "./generator.js";
 
 export default function compile(source, outputType) {
   if (!["analyzed", "optimized", "js"].includes(outputType)) {
-    throw new Error("Unknown output type")
+    throw new Error(`Unknown output type: ${outputType}`);
   }
-  const analyzed = analyze(source)
-  if (outputType === "analyzed") return analyzed
-  const optimized = optimize(analyzed)
-  if (outputType === "optimized") return optimized
-  return generate(optimized)
+  const analyzed = analyze(source);
+  if (outputType === "analyzed") return analyzed;
+  const optimized = optimize(analyzed);
+  if (outputType === "optimized") return optimized;
+  return generate(optimized);
 }
