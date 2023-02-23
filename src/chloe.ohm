@@ -11,7 +11,7 @@ Chloe{
     AssignStmt = id is Exp pls
     
     id = ~keyword idchar+
-    idchar = letter+
+    idchar = letter | "_"
     
     keyword = show | pls | toy | is | dress | nodress
     
@@ -19,6 +19,8 @@ Chloe{
     
     Exp = Exp "+" Term  --add
         | Exp "-" Term  --sub
+        | Exp "*" Term  --mult
+        | Exp "/" Term  --div
         | Term
     
     Term    = numeral 
@@ -33,6 +35,8 @@ Chloe{
     dress = "dress" ~idchar
     nodress = "nodress" ~idchar
     
-    numeral = digit+ ("."digit+)?
+    numeral = ("-")? digit+ ("." digit+)?
     strlit = "\"" (~"\""  any)* "\""
+
+    space += "//" (~"\n" any)*     --comment
 }

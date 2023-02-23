@@ -14,7 +14,7 @@ const chloeGrammar = ohm.grammar(fs.readFileSync("src/chloe.ohm"))
 
 export default function analyze(sourceCode) {
     const context = {
-        locals: new Map(),
+        locals: new Map()
     }
   const analyzer = chloeGrammar.createSemantics().addOperation("rep", {
     Program(body) {
@@ -30,7 +30,7 @@ export default function analyze(sourceCode) {
         }
       return new core.VariableDeclaration(variable, initializer.rep())
     },
-    AssignStmt(target, _eq, source, _bird) {
+    AssignStmt(target, _eq, source, _pls) {
         const name = target.rep()
         const variable = context.locals.get(name)
         if(!variable){
@@ -52,6 +52,12 @@ export default function analyze(sourceCode) {
     },
     Exp_sub(left, _plus, right) {
       return new core.BinaryExpression("-", left.rep(), right.rep())
+    },
+    Exp_mult(left, _plus, right) {
+        return new core.BinaryExpression("*", left.rep(), right.rep())
+    },
+      Exp_div(left, _plus, right) {
+        return new core.BinaryExpression("/", left.rep(), right.rep())
     },
     Term_parens(_open, expression, _close) {
       return expression.rep()
