@@ -8,7 +8,7 @@ it's purpose will be to be a fun and silly language. A lot of the features refer
 |Chloe|Javascript|
 |-----|----------|
 |toy x is 4|let x = 4|
-|show ["Hello World"]|console.log("Hello World")|
+|show ("Hello World")|console.log("Hello World")|
 |dress x == 2, show["hi"]|if x == 2, console.log("hi")|
 |no dress|else|
 |giveBack! Nuh-uh| return false|

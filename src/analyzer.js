@@ -34,7 +34,7 @@ export default function analyze(sourceCode) {
         const name = target.rep()
         const variable = context.locals.get(name)
         if(!variable){
-            error(`Undecalred Variable: ${name}`,target)
+            error(`Undeclared Variable: ${name}`,target)
         }
       return new core.AssignmentStatement(variable, source.rep())
     },
