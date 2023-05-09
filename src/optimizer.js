@@ -1,5 +1,4 @@
-
-import * as core from "./core.js"
+import { UnaryExpression } from "./core.js"
 
 export default function optimize(node) {
   return optimizers[node.constructor.name](node)
@@ -11,172 +10,100 @@ const optimizers = {
     return p
   },
   VariableDeclaration(d) {
-    d.variable = optimize(d.variable)
     d.initializer = optimize(d.initializer)
-    return d
-  },
-  TypeDeclaration(d) {
-    d.type = optimize(d.type)
-    return d
-  },
-  StructType(t) {
-    return t
-  },
-  Field(f) {
-    f.name = f.name.lexeme
-    return f
-  },
-  FunctionDeclaration(d) {
-    d.fun = optimize(d.fun)
-    if (d.body) d.body = optimize(d.body)
     return d
   },
   Variable(v) {
     return v
   },
+  FunctionDeclaration(d) {
+    d.params = optimize(d.params)
+    d.body = optimize(d.body)
+    return d
+  },
   Function(f) {
     return f
   },
-  Increment(s) {
-    s.variable = optimize(s.variable)
-    return s
-  },
-  Decrement(s) {
-    s.variable = optimize(s.variable)
-    return s
-  },
   Assignment(s) {
     s.source = optimize(s.source)
-    s.target = optimize(s.target)
     if (s.source === s.target) {
-      return []
-    }
-    return s
-  },
-  BreakStatement(s) {
-    return s
-  },
-  ReturnStatement(s) {
-    s.expression = optimize(s.expression)
-    return s
-  },
-  ShortReturnStatement(s) {
-    return s
-  },
-  IfStatement(s) {
-    s.test = optimize(s.test)
-    s.consequent = optimize(s.consequent)
-    s.alternate = optimize(s.alternate)
-    if (s.test.constructor === Boolean) {
-      return s.test ? s.consequent : s.alternate
-    }
-    return s
-  },
-  ShortIfStatement(s) {
-    s.test = optimize(s.test)
-    s.consequent = optimize(s.consequent)
-    if (s.test.constructor === Boolean) {
-      return s.test ? s.consequent : []
+      return null
     }
     return s
   },
   WhileStatement(s) {
     s.test = optimize(s.test)
-    if (s.test === false) {
-      // while false is a no-op
-      return []
-    }
     s.body = optimize(s.body)
     return s
   },
-  RepeatStatement(s) {
-    s.count = optimize(s.count)
-    if (s.count === 0) {
-      // repeat 0 times is a no-op
-      return []
-    }
-    s.body = optimize(s.body)
+  PrintStatement(s) {
+    s.argument = optimize(s.argument)
     return s
   },
-  ForRangeStatement(s) {
-    s.iterator = optimize(s.iterator)
-    s.low = optimize(s.low)
-    s.op = optimize(s.op)
-    s.high = optimize(s.high)
-    s.body = optimize(s.body)
-    if (s.low.constructor === Number) {
-      if (s.high.constructor === Number) {
-        if (s.low > s.high) {
-          return []
-        }
-      }
+  Call(c) {
+    c.callee = optimize(c.callee)
+    c.args = optimize(c.args)
+    if (c.args.length === 1 && c.args[0].constructor === Number) {
+      if (c.callee.name === "sqrt") return Math.sqrt(c.args[0])
+      if (c.callee.name === "sin") return Math.sin(c.args[0])
+      if (c.callee.name === "cos") return Math.cos(c.args[0])
+      if (c.callee.name === "ln") return Math.log(c.args[0])
+      if (c.callee.name === "exp") return Math.exp(c.args[0])
     }
-    return s
+    return c
   },
-  ForStatement(s) {
-    s.iterator = optimize(s.iterator)
-    s.collection = optimize(s.collection)
-    s.body = optimize(s.body)
-    if (s.collection instanceof core.EmptyArray) {
-      return []
+  Conditional(c) {
+    c.test = optimize(c.test)
+    c.consequent = optimize(c.consequent)
+    c.alternate = optimize(c.alternate)
+    if (c.test.constructor === Number || c.test.constructor === Boolean) {
+      return c.test ? c.consequent : c.alternate
     }
-    return s
-  },
-  Conditional(e) {
-    e.test = optimize(e.test)
-    e.consequent = optimize(e.consequent)
-    e.alternate = optimize(e.alternate)
-    if (e.test.constructor === Boolean) {
-      return e.test ? e.consequent : e.alternate
-    }
-    return e
+    return c
   },
   BinaryExpression(e) {
-    e.op = optimize(e.op)
     e.left = optimize(e.left)
     e.right = optimize(e.right)
-    if (e.op === "??") {
-      // Coalesce Empty Optional Unwraps
-      if (e.left instanceof core.EmptyOptional) {
+    if (e.left.constructor === Number) {
+      if (e.right.constructor === Number) {
+        if (e.op === "+") {
+          return e.left + e.right
+        } else if (e.op === "-") {
+          return e.left - e.right
+        } else if (e.op === "*") {
+          return e.left * e.right
+        } else if (e.op === "/") {
+          return e.left / e.right
+        } else if (e.op === "%") {
+          return e.left % e.right
+        } else if (e.op === "**" && !(e.left === 0 && e.right == 0)) {
+          return e.left ** e.right
+        }
+      } else if (e.left === 0 && e.op === "+") {
         return e.right
+      } else if (e.left === 1 && e.op === "*") {
+        return e.right
+      } else if (e.left === 0 && e.op === "-") {
+        return new UnaryExpression("-", e.right)
+      } else if (e.left === 0 && ["*", "/", "%"].includes(e.op)) {
+        return 0
+      } else if (e.op === "**" && e.left === 1) {
+        return 1
       }
-    } else if (e.op === "&&") {
-      // Optimize boolean constants in && and ||
-      if (e.left === true) return e.right
-      else if (e.right === true) return e.left
-    } else if (e.op === "||") {
-      if (e.left === false) return e.right
-      else if (e.right === false) return e.left
-    } else if ([Number, BigInt].includes(e.left.constructor)) {
-      // Numeric constant folding when left operand is constant
-      if ([Number, BigInt].includes(e.right.constructor)) {
-        if (e.op === "+") return e.left + e.right
-        else if (e.op === "-") return e.left - e.right
-        else if (e.op === "*") return e.left * e.right
-        else if (e.op === "/") return e.left / e.right
-        else if (e.op === "**") return e.left ** e.right
-        else if (e.op === "<") return e.left < e.right
-        else if (e.op === "<=") return e.left <= e.right
-        else if (e.op === "==") return e.left === e.right
-        else if (e.op === "!=") return e.left !== e.right
-        else if (e.op === ">=") return e.left >= e.right
-        else if (e.op === ">") return e.left > e.right
-      } else if (e.left === 0 && e.op === "+") return e.right
-      else if (e.left === 1 && e.op === "*") return e.right
-      else if (e.left === 0 && e.op === "-") return new core.UnaryExpression("-", e.right)
-      else if (e.left === 1 && e.op === "**") return 1
-      else if (e.left === 0 && ["*", "/"].includes(e.op)) return 0
     } else if (e.right.constructor === Number) {
-      // Numeric constant folding when right operand is constant
-      if (["+", "-"].includes(e.op) && e.right === 0) return e.left
-      else if (["*", "/"].includes(e.op) && e.right === 1) return e.left
-      else if (e.op === "*" && e.right === 0) return 0
-      else if (e.op === "**" && e.right === 0) return 1
+      if (["+", "-"].includes(e.op) && e.right === 0) {
+        return e.left
+      } else if (["*", "/"].includes(e.op) && e.right === 1) {
+        return e.left
+      } else if (e.op === "*" && e.right === 0) {
+        return 0
+      } else if (e.op === "**" && e.left !== 0 && e.right === 0) {
+        return 1
+      }
     }
     return e
   },
   UnaryExpression(e) {
-    e.op = optimize(e.op)
     e.operand = optimize(e.operand)
     if (e.operand.constructor === Number) {
       if (e.op === "-") {
@@ -185,49 +112,14 @@ const optimizers = {
     }
     return e
   },
-  EmptyOptional(e) {
-    return e
+  Number(n) {
+    return n
   },
-  SubscriptExpression(e) {
-    e.array = optimize(e.array)
-    e.index = optimize(e.index)
-    return e
-  },
-  ArrayExpression(e) {
-    e.elements = optimize(e.elements)
-    return e
-  },
-  EmptyArray(e) {
-    return e
-  },
-  MemberExpression(e) {
-    e.object = optimize(e.object)
-    return e
-  },
-  FunctionCall(c) {
-    c.callee = optimize(c.callee)
-    c.args = optimize(c.args)
-    return c
-  },
-  ConstructorCall(c) {
-    c.callee = optimize(c.callee)
-    c.args = optimize(c.args)
-    return c
-  },
-  BigInt(e) {
-    return e
-  },
-  Number(e) {
-    return e
-  },
-  Boolean(e) {
-    return e
-  },
-  String(e) {
-    return e
+  Boolean(b) {
+    return b
   },
   Array(a) {
-    // Flatmap since each element can be an array
-    return a.flatMap(optimize)
+    // Optimizing arrays involves flattening an removing nulls
+    return a.flatMap(optimize).filter(s => s !== null)
   },
 }

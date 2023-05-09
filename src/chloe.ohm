@@ -4,18 +4,26 @@ Chloe{
               | VarDec    
               | IfStmt
               | AssignStmt
+              | WhileStmt
+              | FuncDec 
             
     PrintStmt = show "(" Exp ")" pls
     VarDec = toy Var is Exp pls
     IfStmt = dress Exp+ Statement+ nodress Statement+
-    AssignStmt = id is Exp pls
+    AssignStmt = Var is Exp pls
+    WhileStmt = washingHands Exp Block
+    FuncDec = puzzle id Params is Exp
     
-    id = ~keyword idchar+
-    idchar = letter | "_"
+    id  = ~keyword letter idchar*
+  idchar = letter | digit | "_"
     
-    keyword = show | pls | toy | is | dress | nodress
+    keyword = show | pls | toy | is | dress | nodress | washingHands | puzzle
     
-    Var = id
+    Var = Var "[" Exp "]"            --subscript
+        | id                         --id
+    Call = id "(" ListOf<Exp, ","> ")"
+    Params = "(" ListOf<id, ","> ")"
+    Block = "{" Statement* "}"
     
     Exp = Exp "+" Term  --add
         | Exp "-" Term  --sub
@@ -26,6 +34,8 @@ Chloe{
     Term    = numeral 
             | strlit
             | Var
+            | Call           --call
+            | id             --id
             | "(" Exp ")"    --parens
             
     show = "show" ~idchar
@@ -34,8 +44,10 @@ Chloe{
     is = "is"     ~idchar
     dress = "dress" ~idchar
     nodress = "nodress" ~idchar
+    washingHands = "washingHands" ~idchar
+    puzzle = "puzzle" ~idchar
     
-    numeral = ("-")? digit+ ("." digit+)?
+    numeral = digit+ ("." digit+)? (("E" | "e") ("+" | "-")? digit+)?
     strlit = "\"" (~"\""  any)* "\""
 
     space += "//" (~"\n" any)*     --comment
