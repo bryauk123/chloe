@@ -1,6 +1,6 @@
-import fs from "fs"
-import ohm from "ohm-js"
-import * as core from "./core.js"
+import fs from "fs";
+import ohm from "ohm-js";
+import * as core from "./core.js";
 
 // Throw an error message that takes advantage of Ohm's messaging
 function must(condition, errorMessage) {
@@ -41,7 +41,7 @@ function mustAllBeSameType(elements) {
   must(allSameType, "Mixed types in array");
 }
 
-const chloeGrammar = ohm.grammar(fs.readFileSync("src/chloe.ohm"))
+const chloeGrammar = ohm.grammar(fs.readFileSync("src/chloe.ohm"));
 
 class Context {
   constructor() {
@@ -55,21 +55,21 @@ class Context {
   }
 }
 
-export default function analyze(sourceCode) {
-    const context = new Context();
-  const analyzer = chloeGrammar.createSemantics().addOperation("rep", {
+export default function analyze(match) {
+  const context = new Context();
+  const analyzer = match.matcher.grammar.createSemantics().addOperation("rep", {
     Program(body) {
-      return new core.Program(body.rep())
+      return new core.Program(body.rep());
     },
     PrintStmt(_show, _left, argument, _right, _pls) {
-      return new core.PrintStatement(argument.rep())
+      return new core.PrintStatement(argument.rep());
     },
     VarDec(_toy, identifier, _eq, initializer, _pls) {
-        const name = identifier.rep()
-        if(context.locals.has(name)){
-            error(`Redeclared var: ${variable}`,identifier)
-        }
-      return new core.VariableDeclaration(variable, initializer.rep())
+      const name = identifier.rep();
+      if (context.locals.has(name)) {
+        error(`Redeclared var: ${variable}`, identifier);
+      }
+      return new core.VariableDeclaration(variable, initializer.rep());
     },
     WhileStmt(_washingHands, exp, block) {
       const test = exp.rep();
@@ -78,15 +78,19 @@ export default function analyze(sourceCode) {
       return new core.WhileStmt(test, body);
     },
     AssignStmt(target, _eq, source, _pls) {
-        const name = target.rep()
-        const variable = context.locals.get(name)
-        if(!variable){
-            error(`Undeclared Variable: ${name}`,target)
-        }
-      return new core.AssignmentStatement(variable, source.rep())
+      const name = target.rep();
+      const variable = context.locals.get(name);
+      if (!variable) {
+        error(`Undeclared Variable: ${name}`, target);
+      }
+      return new core.AssignmentStatement(variable, source.rep());
     },
     IfStmt(_dress, test, consequent, _nodress, alternate) {
-      return new core.IfStatement(test.rep(), consequent.rep(), alternate.rep())
+      return new core.IfStatement(
+        test.rep(),
+        consequent.rep(),
+        alternate.rep()
+      );
     },
     Var(id) {
       const entity = context.lookup(id.sourceString);
@@ -94,33 +98,30 @@ export default function analyze(sourceCode) {
       return entity;
     },
     Exp_add(left, _plus, right) {
-      return new core.BinaryExpression("+", left.rep(), right.rep())
+      return new core.BinaryExpression("+", left.rep(), right.rep());
     },
     Exp_sub(left, _plus, right) {
-      return new core.BinaryExpression("-", left.rep(), right.rep())
+      return new core.BinaryExpression("-", left.rep(), right.rep());
     },
     Exp_mult(left, _plus, right) {
-        return new core.BinaryExpression("*", left.rep(), right.rep())
+      return new core.BinaryExpression("*", left.rep(), right.rep());
     },
-      Exp_div(left, _plus, right) {
-        return new core.BinaryExpression("/", left.rep(), right.rep())
+    Exp_div(left, _plus, right) {
+      return new core.BinaryExpression("/", left.rep(), right.rep());
     },
     Term_parens(_open, expression, _close) {
-      return expression.rep()
+      return expression.rep();
     },
     numeral(_whole, _point, _fraction, _e, _sign, _exponent) {
-      return Number(this.sourceString)
-
+      return Number(this.sourceString);
     },
     strlit(_open, chars, _close) {
       return this.sourceString;
     },
     _iter(...children) {
-      return children.map((child) => child.rep())
+      return children.map((child) => child.rep());
     },
-  })
+  });
 
-  const match = chloeGrammar.match(sourceCode)
-  if (!match.succeeded()) error(match.message)
-  return analyzer(match).rep()
+  return analyzer(match).rep();
 }
